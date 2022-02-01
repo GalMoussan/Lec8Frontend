@@ -3,129 +3,115 @@ import ButtonWithProgress from "../components/ButtonWithProgress";
 import Input from "../components/Input";
 
 
-// const UserSignUpPage = () =>{
-//     const [displayName, setDisplayName] = useState('')
-//     const [username, setUserName] = useState('')
+const UserSignUpPage = (props) => {
+    const [displayName, setDisplayName] = useState('')
+    const [username, setUserName] = useState('')
+    const [password, setPassword] = useState('')
+    const [pendingApiCall, setPendingApiCall] = useState(false)
+    const [errors, setErrors] = useState({})
 
-// }
 
-class UserSignUpPage extends React.Component {
-    state = {
-        displayName: '',
-        userName: '',
-        password: '',
-        pendingApiCalls: false,
-        errors: {}
-    }
-    onChangeDisplayName = (e) => {
-        const errors = {...this.state.errors}
-        delete errors.displayName
-        this.setState({ displayName: e.target.value , errors})
+
+    const onChangeDisplayName = (e) => {
+        const merrors = { ...errors }
+        delete merrors.displayName
+        setDisplayName(e.target.value)
+        setErrors(merrors)
     }
 
-    onChangeUserName = (e) => {
-        const errors = {...this.state.errors}
-        delete errors.userName
-        this.setState({ userName: e.target.value , errors})
+    const onChangeUserName = (e) => {
+        const merrors = { ...errors }
+        delete merrors.username
+        setUserName(e.target.value)
+        setErrors(merrors)
     }
 
-    onChangePassword = (e) => {
-        const errors = {...this.state.password}
-        delete errors.password
-        this.setState({ password: e.target.value , errors})
+    const onChangePassword = (e) => {
+        const merrors = { ...errors }
+        delete merrors.password
+        setPassword(e.target.value)
+        setErrors(merrors)
     }
 
-    onClickSignUp = () => {
-        this.setState({ pendingApiCalls: true })
+    const onClickSignUp = () => {
+        setPendingApiCall(true)
         const user = {
-            displayName: this.state.displayName,
-            userName: this.state.userName,
-            password: this.state.password
+            displayName,
+            userName:username,
+            password
         }
 
-        this.props.actions.postSignUp(user)
+        props.actions.postSignUp(user)
             .then((response) => {
-                this.setState({ pendingApiCalls: false })
+                setPendingApiCall(false)
             })
             .catch(e => {
+                console.dir(e)
 
                 // check that we have a response, response data and response data validationErrors
-                let errors = { ...this.state.errors }
+                let merrors = {}
                 if (e.response && e.response.data && e.response.data.validationErrors) {
                     // let errors = {...this.state.errors} // copy the state errors into a variable
-                    errors = { ...e.response.data.validationErrors }
+                    merrors = { ...e.response.data.validationErrors }
                 }
-                this.setState({ pendingApiCalls: false, errors: errors })
+                setErrors(merrors)
+                setPendingApiCall(false)
             })
-
-
     }
 
+    return (
+        <div className='container'>
 
-    render() {
-        return (
-            <div className='container'>
+            <h1 className='text-center'>Sign up</h1>
 
-                <h1 className='text-center'>Sign up</h1>
+            <div className='col-12 mb-3'>
+                <Input
+                    label='Display Name'
+                    onChange={onChangeDisplayName}
+                    value={displayName}
+                    placeholder='Your Display Name'
+                    hasError={errors.displayName && true}
+                    error={errors.displayName}
+                />
+            </div>
+            <div className="col-12 mb-3">
+                <Input
+                    label='User Name'
+                    value={username}
+                    onChange={onChangeUserName}
+                    placeholder='Your username'
+                    hasError={errors.username && true}
+                    error={errors.username}
+                />
+            </div>
+            <div className='col-12 mb-3'>
+                <Input
+                    label='Password'
+                    value={password}
+                    onChange={onChangePassword}
+                    type='password'
+                    placeholder='Your password'
+                    hasError={errors.password && true}
+                    error={errors.password}
 
-                <div className='col-12 mb-3'>
-                    <Input
-                        label='Display Name'
-                        onChange={this.onChangeDisplayName}
-                        value={this.state.displayName}
-                        placeholder='Your Display Name'
-                        hasError={this.state.errors.displayName && true}
-                        error={this.state.errors.displayName}
-                    />
-                </div>
-                <div className="col-12 mb-3">
-                    <Input
-                        label='User Name'
-                        value={this.state.userName}
-                        onChange={this.onChangeUserName}
-                        placeholder='Your username'
-                        hasError={this.state.errors.userName && true}
-                        error={this.state.errors.userName}
-                    />
-                </div>
-                <div className='col-12 mb-3'>
-                    <Input
-                        label='Password'
-                        value={this.state.password}
-                        onChange={this.onChangePassword}
-                        type='password'
-                        placeholder='Your password'
-                        hasError={this.state.errors.password && true}
-                        error={this.state.errors.password}
+                />
+            </div>
 
-                    />
-                </div>
-
-                <div className='col-12 mb-3 text-center'>
-                    <ButtonWithProgress
-                        disabled={this.state.pendingApiCalls}
-                        text='Sign Up'
-                        onClick={this.onClickSignUp}
-                        showProgress={this.state.pendingApiCalls}
-                    />
-                </div>
-
-
+            <div className='col-12 mb-3 text-center'>
+                <ButtonWithProgress
+                    disabled={pendingApiCall}
+                    text='Sign Up'
+                    onClick={onClickSignUp}
+                    showProgress={pendingApiCall}
+                />
             </div>
 
 
-        )
-    }
+        </div>
+
+
+    )
 }
 
-UserSignUpPage.defaultProps = {
-    actions: {
-        postSignUp: () => {
-            return new Promise((resolve, reject) => {
-                resolve({})
-            })
-        }
-    }
-}
 
 export default UserSignUpPage;
